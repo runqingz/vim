@@ -29,15 +29,21 @@ Plugin 'prettier/vim-prettier', {
   \ 'for': ['javascript', 'css', 'json']
   \ }
 
+
 source ~/.vim_runtime/vimrcs/basic.vim
 source ~/.vim_runtime/vimrcs/filetypes.vim
 source ~/.vim_runtime/vimrcs/plugins_config.vim
 source ~/.vim_runtime/vimrcs/extended.vim
 
+
 try
 source ~/.vim_runtime/my_configs.vim
 catch
 endtry
+
+
+Plugin 'junegunn/fzf.vim'
+Plugin 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' } " used for completion for LanguageClient
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -118,4 +124,49 @@ if !exists('g:neocomplete#sources#omni#force_omni_input_patterns')
     let g:neocomplete#sources#omni#force_omni_input_patterns = {}
 endif
 let g:neocomplete#sources#omni#input_patterns.ruby = '[^.[:digit:] *\t]\%(\.\|->\)'
+
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --max-count=1 --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>), 1,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \   <bang>0)
+
+command! -bang -nargs=* Rga
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always --smart-case '.shellescape(<q-args>), 1,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \   <bang>0)
+
+command! -bang -nargs=* RgCword
+  \ call fzf#vim#grep(
+  \   'rg --column --max-count=1 --line-number --no-heading --color=always '.expand("<cword>").'', 1,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \   <bang>0)
+
+" Similarly, we can apply it to fzf#vim#grep. To use ripgrep instead of ag:
+" Grep word under cursor:
+command! -bang -nargs=* RgaCword
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always '.expand("<cword>").'', 1,
+  \   <bang>0 ? fzf#vim#with_preview('up:60%')
+  \           : fzf#vim#with_preview('right:50%:hidden', '?'),
+  \   <bang>0)
+if has('macunix')
+
+  nnoremap <silent> ® :RgCword<CR>
+  vnoremap <silent> ® :RgCword<CR>
+
+  nnoremap <silent> ‰ :RgaCword<CR>
+  vnoremap <silent> ‰ :RgaCword<CR>
+elseif has('unix')
+
+  nnoremap <silent> <M-r> :RgCword<CR>
+  vnoremap <silent> <M-r> :RgCword<CR>
+
+  nnoremap <silent> <M-r> :RgCword<CR>
+  vnoremap <silent> <M-r> :RgCword<CR>
+endif
 
